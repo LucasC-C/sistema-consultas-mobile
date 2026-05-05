@@ -7,7 +7,7 @@ import { Paciente } from "./src/types/paciente";
 import { Medico } from "./src/interfaces/medico";
 import { Consulta } from "./src/interfaces/consulta";
 
-// 2. Dados "Mockados" (Simulando o que viria do Backend)
+// 2. Dados "Mockados" (Simulando o Banco de Dados)
 const cardiologia: Especialidade = {
   id: 1,
   nome: "Cardiologia",
@@ -31,16 +31,18 @@ const paciente1: Paciente = {
 };
 
 export default function App() {
-  // 3. O Estado agora utiliza a Interface Consulta completa e aninha os objetos
+  // 3. Estado Tipado (Passo 13)
   const [consulta, setConsulta] = useState<Consulta>({
     id: 1,
-    medico: medico1, // Usando o objeto Medico criado acima
-    paciente: paciente1, // Usando o objeto Paciente criado acima
-    data: new Date("2026-02-28T14:30:00"), // Agora é um Date real
-    valor: 250.0,
+    medico: medico1,
+    paciente: paciente1,
+    data: new Date(2026, 2, 10), // Representa 10 de Março de 2026
+    valor: 350,
     status: "agendada",
+    observacoes: "Consulta de rotina",
   });
 
+  // 4. Função para Confirmar Consulta (Passo 14)
   function confirmarConsulta() {
     setConsulta({
       ...consulta,
@@ -48,7 +50,20 @@ export default function App() {
     });
   }
 
-  // 4. A Interface Visual atualizada
+  // 5. Função para Formatar Valor Monetário (Passo 15)
+  function formatarValor(valor: number): string {
+    return valor.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  // 6. Função para Formatar Data Brasileira (Passo 16)
+  function formatarData(data: Date): string {
+    return data.toLocaleDateString("pt-BR");
+  }
+
+  // 7. Interface Visual
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Sistema de Consultas</Text>
@@ -68,18 +83,19 @@ export default function App() {
 
         <View style={styles.divisor} />
 
-        {/* Formatando a data real para algo legível */}
-        <Text>
-          Data: {consulta.data.toLocaleDateString("pt-BR")} às{" "}
-          {consulta.data.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </Text>
-        <Text>Valor: R$ {consulta.valor.toFixed(2)}</Text>
+        {/* Utilizando as funções de formatação */}
+        <Text>Data: {formatarData(consulta.data)}</Text>
+        <Text>Valor: {formatarValor(consulta.valor)}</Text>
+        
+        {/* Renderização condicional para as observações */}
+        {consulta.observacoes && (
+          <Text>Obs: {consulta.observacoes}</Text>
+        )}
+        
         <Text>Status: {consulta.status.toUpperCase()}</Text>
 
         <View style={styles.botaoContainer}>
+          {/* Botão desaparece após a confirmação */}
           {consulta.status === "agendada" && (
             <Button
               title="Confirmar Consulta"
@@ -87,17 +103,17 @@ export default function App() {
               onPress={confirmarConsulta}
             />
           )}
-        </Text>
+        </View>
       </View>
     </View>
   );
 }
 
-// 5. Estilos atualizados para comportar as novas informações
+// 8. Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f4f4", // Fundo levemente cinza
+    backgroundColor: "#f4f4f4",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -112,12 +128,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 12,
-    // Efeito de sombra (Sombra no iOS)
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    // Sombra no Android
     elevation: 3,
   },
   textoDestaque: {
